@@ -24,7 +24,22 @@ class User(AbstractUser):
         blank=False,
         null=False
     )
+    bio = models.TextField(
+        'биография',
+        blank=True,
+    )
+    first_name = models.CharField(
+        'имя',
+        max_length=150,
+        blank=True
+    )
+    last_name = models.CharField(
+        'фамилия',
+        max_length=150,
+        blank=True
+    )
     email = models.EmailField(
+        max_length=254,
         unique=True
     )
     confirmation_code = models.CharField(
