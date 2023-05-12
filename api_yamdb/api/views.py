@@ -1,12 +1,22 @@
-<<<<<<< HEAD
+from api.permissions import AdminOnly
+from django.core.mail import EmailMessage
 from django.shortcuts import render
-from rest_framework import filters, viewsets
+from rest_framework import filters, permissions, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.filters import SearchFilter
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
+from rest_framework_simplejwt.tokens import RefreshToken
 from reviews.models import Category, Genre, Title
+from users.models import User
 
 from .filters import TitleFilter
 from .serializers import (CategorySerializer, GenreSerializer,
-                          TitleCreateSerializer, TitleGetSerializer)
+                          GetTokenSerializer, NotAdminSerializer,
+                          SignUpSerializer, TitleCreateSerializer,
+                          TitleGetSerializer, UsersSerializer)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -37,23 +47,8 @@ class GenreViewSet(viewsets.ModelViewSet):
     serializer_class = GenreSerializer
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
-=======
-from .serializers import (GetTokenSerializer,
-                          NotAdminSerializer,
-                          SignUpSerializer,
-                          UsersSerializer)
-from api.permissions import AdminOnly
-from users.models import User
-from rest_framework.filters import SearchFilter
-from rest_framework.permissions import IsAuthenticated
-from rest_framework import permissions, status, viewsets
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework_simplejwt.tokens import RefreshToken
-from django.core.mail import EmailMessage
 
-
+    
 class UsersViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UsersSerializer
@@ -150,4 +145,3 @@ class APISignup(APIView):
         }
         self.send_email(data)
         return Response(serializer.data, status=status.HTTP_200_OK)
->>>>>>> e10bb8baf67ffd1f9d4356dedd5e49c0ff5545cb

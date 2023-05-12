@@ -1,7 +1,7 @@
 from rest_framework import serializers
-<<<<<<< HEAD
 from reviews.models import Category, Genre, Title
 from reviews.validators import validate_year
+from users.models import User
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -39,9 +39,6 @@ class TitleCreateSerializer(serializers.ModelSerializer):
         model = Title
         fields = 'id', 'name', 'category', 'genre', 'year', 'description'
     
-=======
-from users.models import User
-
 
 class UsersSerializer(serializers.ModelSerializer):
     class Meta:
@@ -78,4 +75,3 @@ class SignUpSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('email', 'username')
->>>>>>> e10bb8baf67ffd1f9d4356dedd5e49c0ff5545cb
