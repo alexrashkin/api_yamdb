@@ -1,11 +1,11 @@
-from datetime import datetime
-
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 
 
 def validate_year(value):
-    """Проверка корректности указания года создания(исключаем будущее время)"""
-    if value > datetime.now().year:
+    """Проверка корректности указания года создания произведения"""
+    current_year = timezone.now().year
+    if value > current_year:
         raise ValidationError(
-            ('Ошибка, проверьте год создания произведения!'),
-            params={'value': value},)
+            f"Год создания произведения не может быть больше {current_year}."
+        )
