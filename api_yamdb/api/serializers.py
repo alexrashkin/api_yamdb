@@ -1,4 +1,5 @@
 from rest_framework import serializers
+<<<<<<< HEAD
 from reviews.models import Category, Genre, Title
 from reviews.validators import validate_year
 
@@ -38,3 +39,43 @@ class TitleCreateSerializer(serializers.ModelSerializer):
         model = Title
         fields = 'id', 'name', 'category', 'genre', 'year', 'description'
     
+=======
+from users.models import User
+
+
+class UsersSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            'username', 'email', 'first_name',
+            'last_name', 'bio', 'role')
+
+
+class NotAdminSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            'username', 'email', 'first_name',
+            'last_name', 'bio', 'role')
+        read_only_fields = ('role',)
+
+
+class GetTokenSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(
+        required=True)
+    confirmation_code = serializers.CharField(
+        required=True)
+
+    class Meta:
+        model = User
+        fields = (
+            'username',
+            'confirmation_code'
+        )
+
+
+class SignUpSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('email', 'username')
+>>>>>>> e10bb8baf67ffd1f9d4356dedd5e49c0ff5545cb
