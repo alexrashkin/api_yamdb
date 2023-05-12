@@ -1,26 +1,22 @@
 from api.permissions import AdminOnly
 from django.core.mail import EmailMessage
 from django.shortcuts import render
-from reviews.models import Category, Genre, Title
-from users.models import User
-from rest_framework.viewsets import ModelViewSet
+from rest_framework import filters, permissions, status, viewsets
+from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticated
-from rest_framework import permissions, status, viewsets, filters
-from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
-from .filters import TitleFilter
+from reviews.models import Category, Genre, Title
+from users.models import User
 
-from .serializers import (CategorySerializer,
-                          GenreSerializer,
-                          TitleCreateSerializer,
-                          TitleGetSerializer, 
-                          GetTokenSerializer,
-                          NotAdminSerializer,
-                          SignUpSerializer,
-                          UsersSerializer)
+from .filters import TitleFilter
+from .serializers import (CategorySerializer, GenreSerializer,
+                          GetTokenSerializer, NotAdminSerializer,
+                          SignUpSerializer, TitleCreateSerializer,
+                          TitleGetSerializer, UsersSerializer)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
