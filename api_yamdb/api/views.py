@@ -1,19 +1,58 @@
-from .serializers import (GetTokenSerializer,
-                          NotAdminSerializer,
-                          SignUpSerializer,
-                          UsersSerializer)
 from api.permissions import AdminOnly
+from django.core.mail import EmailMessage
+from django.shortcuts import render
+from reviews.models import Category, Genre, Title
 from users.models import User
+from rest_framework.viewsets import ModelViewSet
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticated
-from rest_framework import permissions, status, viewsets
+from rest_framework import permissions, status, viewsets, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.core.mail import EmailMessage
+from .filters import TitleFilter
+
+from .serializers import (CategorySerializer,
+                          GenreSerializer,
+                          TitleCreateSerializer,
+                          TitleGetSerializer, 
+                          GetTokenSerializer,
+                          NotAdminSerializer,
+                          SignUpSerializer,
+                          UsersSerializer)
 
 
+class TitleViewSet(viewsets.ModelViewSet):
+    """ Вьюсет для работы с произведениями """
+    queryset = Title.objects.all()
+    serializer_class = TitleGetSerializer
+    filterset_class = (TitleFilter,)
+    search_fields = ('name',)
+    ordering = ('name',)
+
+    def get_serializer_class(self):
+        if self.request.method in ['POST', 'PUT', 'PATCH']:
+            return TitleCreateSerializer
+        return TitleGetSerializer
+
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    """ Вьюсет для работы с категориями """
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+
+
+class GenreViewSet(viewsets.ModelViewSet):
+    """ Вьюсет для работы с жанрами """
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+
+    
 class UsersViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UsersSerializer

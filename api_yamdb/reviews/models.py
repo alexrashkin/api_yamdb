@@ -1,3 +1,4 @@
+from django.core.validators import RegexValidator
 from django.db import models
 
 from .validators import validate_year
@@ -8,7 +9,13 @@ class Genre(models.Model):
     name = models.CharField(verbose_name='Название жанра',
                             max_length=50, unique=True)
     slug = models.SlugField(verbose_name='Слаг жанра', max_length=50,
-                            unique=True)
+                            unique=True, validators=[
+                                RegexValidator(
+                                    regex=r'^[-a-zA-Z0-9_]+$',
+                                    message='Слаг может содержать только латинские буквы, цифры, знак подчеркивания и дефис.',
+                                    code='invalid_slug'
+                                )
+                            ])
 
     class Meta:
         verbose_name = "Жанр"
