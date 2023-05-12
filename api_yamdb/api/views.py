@@ -27,7 +27,7 @@ class UsersViewSet(viewsets.ModelViewSet):
         detail=False,
         permission_classes=(IsAuthenticated,),
         url_path='me')
-    def get_current_user_info(self, request):
+    def get_current_user(self, request):
         serializer = UsersSerializer(request.user)
         if request.method == 'PATCH':
             if request.user.is_admin:
@@ -100,7 +100,7 @@ class APISignup(APIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         email_body = (
-            f'Доброе время суток, {user.username}.'
+            f'Здравствуйте, {user.username}.'
             f'\nКод подтверждения для доступа к API: {user.confirmation_code}'
         )
         data = {
