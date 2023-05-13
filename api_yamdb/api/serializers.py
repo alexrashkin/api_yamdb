@@ -1,26 +1,9 @@
 from rest_framework import serializers
-from reviews.models import Review, Comment
-from reviews.models import Category, Genre, Title
+from django.shortcuts import get_object_or_404
+
+from reviews.models import Category, Genre, Title, Review, Comment
 from reviews.validators import validate_year
 from users.models import User
-
-
-class ReviewSerializer(serializers.ModelSerializer):
-    class Meta:
-        fields = '__all__'
-        model = Review
-
-
-class CommentSerializer(serializers.ModelSerializer):
-    author = serializers.SlugRelatedField(
-        read_only=True,
-        default=serializers.CurrentUserDefault(),
-        slug_field='username')
-    review = serializers.PrimaryKeyRelatedField(read_only=True)
-
-    class Meta:
-        fields = '__all__'
-        model = Comment
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -94,3 +77,55 @@ class SignUpSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('email', 'username')
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        read_only=True,
+        default=serializers.CurrentUserDefault(),
+        slug_field='username')
+    title = serializers.PrimaryKeyRelatedField(read_only=True)
+
+    class Meta:
+        fields = '__all__'
+        model = Review
+
+    # def validate(self, attr):
+        # author = self.context["request"].user
+        # if Review.objects.filter(
+        #     title=value,
+        #     author=author
+        # ).exists():
+        #     raise serializers.ValidationError("Можно оставлять только один отзыв")
+        # return value
+
+    def validate(self, attrs):
+        title_id = self.context.get("view").kwargs.get("title_id")
+        title = get_object_or_404(Title, pk=title_id)
+        author = self.context["request"].user
+        if self.context["request"].method == 'POST' and Review.objects.filter(
+            title=title,
+            author=author
+        ).exists():
+            raise serializers.ValidationError(
+                "Можно оставлять только один отзыв")
+        return attrs
+    # def validate(self, value):
+    #     if Review.objects.filter(
+    #         title=self.context.get("view").kwargs.get("title_id"),
+    #         author=self.context["request"].user
+    #     ).exists():
+    #         return value
+    #     raise serializers.ValidationError("Можно оставлять только один отзыв")
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        read_only=True,
+        default=serializers.CurrentUserDefault(),
+        slug_field='username')
+    review = serializers.PrimaryKeyRelatedField(read_only=True)
+
+    class Meta:
+        fields = '__all__'
+        model = Comment

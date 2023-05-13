@@ -1,10 +1,7 @@
 from rest_framework import viewsets
 from django.shortcuts import get_object_or_404
 
-from reviews.models import Review, Comment
-from .serializers import ReviewSerializer, CommentSerializer
-
-from api.permissions import AdminOnly
+from api.permissions import AdminOnly, AuthorAdminModeratorOrReadOnly
 from django.core.mail import EmailMessage
 from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
@@ -13,33 +10,15 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-from reviews.models import Category, Genre, Title
-from users.models import User
 
+from reviews.models import Category, Genre, Title, Review, Comment
+from users.models import User
 from .filters import TitleFilter
 from .serializers import (CategorySerializer, GenreSerializer,
                           GetTokenSerializer, NotAdminSerializer,
                           SignUpSerializer, TitleCreateSerializer,
-                          TitleGetSerializer, UsersSerializer)
-
-
-class ReviewViewSet(viewsets.ModelViewSet):
-    queryset = Review.objects.all()
-    serializer_class = ReviewSerializer
-
-
-class CommentViewSet(viewsets.ModelViewSet):
-    serializer_class = CommentSerializer
-
-    def get_queryset(self):
-        return Comment.objects.filter(review=self.get_review_id())
-
-    def get_review_id(self):
-        return self.kwargs.get("review_id")
-
-    def perform_create(self, serializer):
-        review = get_object_or_404(Review, pk=self.get_review_id())
-        serializer.save(review=review, author=self.request.user)
+                          TitleGetSerializer, UsersSerializer,
+                          ReviewSerializer, CommentSerializer)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -120,6 +99,7 @@ class APIGetToken(APIView):
         "confirmation_code": "string"
     }
     """
+    permission_classes = (permissions.AllowAny,)
 
     def post(self, request):
         serializer = GetTokenSerializer(data=request.data)
@@ -181,3 +161,34 @@ class APISignup(APIView):
         }
         self.send_email(data)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+    permission_classes = (AuthorAdminModeratorOrReadOnly,)
+
+    def get_title_id(self):
+        return self.kwargs.get("title_id")
+
+    def get_queryset(self):
+        return Review.objects.filter(title=self.get_title_id())
+
+    def perform_create(self, serializer):
+        title = get_object_or_404(Title, pk=self.get_title_id())
+        serializer.save(title=title, author=self.request.user)
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    serializer_class = CommentSerializer
+    permission_classes = (AuthorAdminModeratorOrReadOnly,)
+
+    def get_review_id(self):
+        return self.kwargs.get("review_id")
+
+    def get_queryset(self):
+        return Comment.objects.filter(review=self.get_review_id())
+
+    def perform_create(self, serializer):
+        review = get_object_or_404(Review, pk=self.get_review_id())
+        serializer.save(review=review, author=self.request.user)
