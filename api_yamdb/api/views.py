@@ -23,7 +23,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     """ Вьюсет для работы с произведениями """
     queryset = Title.objects.all()
     serializer_class = TitleGetSerializer
-    filterset_class = (TitleFilter,)
+    filterset_class = TitleFilter
     search_fields = ('name',)
     ordering = ('name',)
 
@@ -56,6 +56,7 @@ class UsersViewSet(viewsets.ModelViewSet):
     lookup_field = 'username'
     filter_backends = (SearchFilter, )
     search_fields = ('username', )
+    http_method_names = ['get', 'post', 'patch', 'delete', ]
 
     @action(
         methods=['GET', 'PATCH'],
