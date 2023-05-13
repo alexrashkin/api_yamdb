@@ -1,5 +1,6 @@
 from api.permissions import AdminOnly
-from django.core.mail import EmailMessage
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
 from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
@@ -120,29 +121,25 @@ class APISignup(APIView):
         "username": "string"
     }
     """
+    queryset = User.objects.all()
+    serializer_class = SignUpSerializer
     permission_classes = (permissions.AllowAny,)
-
-    @staticmethod
-    def send_email(data):
-        email = EmailMessage(
-            subject=data['email_subject'],
-            body=data['email_body'],
-            to=[data['to_email']]
-        )
-        email.send()
 
     def post(self, request):
         serializer = SignUpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.save()
-        email_body = (
-            f'Здравствуйте, {user.username}.'
-            f'\nКод подтверждения для доступа к API: {user.confirmation_code}'
+        username = serializer.data.get('username')
+        email = serializer.data.get('email')
+        user, created = User.objects.get_or_create(
+            username=username,
+            email=email
         )
-        data = {
-            'email_body': email_body,
-            'to_email': user.email,
-            'email_subject': 'Код подтверждения для доступа к API!'
-        }
-        self.send_email(data)
+        confirmation_code = default_token_generator.make_token(user)
+        send_mail(
+            subject='Код подтверждения.',
+            message=f'Здравствуйте, {user.username}.'
+                    f'\nКод подтверждения для доступа: {confirmation_code}',
+            from_email=None,
+            recipient_list=[user.email],
+        )
         return Response(serializer.data, status=status.HTTP_200_OK)

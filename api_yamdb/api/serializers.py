@@ -1,21 +1,21 @@
 from rest_framework import serializers
-from users.models import User
-
 from reviews.models import Category, Genre, Title
 from reviews.validators import validate_year
+from users.models import User
+from users.validators import validate_username
 
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = ('name', 'slug')
-        
+
 
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genre
         fields = ('name', 'slug')
-        
+
 
 class TitleGetSerializer(serializers.ModelSerializer):
     genre = GenreSerializer(many=True, read_only=True),
@@ -39,7 +39,7 @@ class TitleCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Title
         fields = 'id', 'name', 'category', 'genre', 'year', 'description'
-    
+
 
 class UsersSerializer(serializers.ModelSerializer):
     class Meta:
@@ -73,6 +73,24 @@ class GetTokenSerializer(serializers.ModelSerializer):
 
 
 class SignUpSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(
+        required=True,
+        max_length=150,
+        validators=[validate_username, ]
+    )
+    email = serializers.EmailField(required=True, max_length=254)
+
+    def validate(self, data):
+        if User.objects.filter(username=data['username'],
+                               email=data['email']).exists():
+            return data
+        if (User.objects.filter(username=data['username']).exists()
+                or User.objects.filter(email=data['email']).exists()):
+            raise serializers.ValidationError(
+                'Пользователь с такими данными уже существует!'
+            )
+        return data
+
     class Meta:
         model = User
         fields = ('email', 'username')
