@@ -1,13 +1,11 @@
 from api.permissions import AdminOnly
 from django.core.mail import EmailMessage
-from django.shortcuts import render
 from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 from reviews.models import Category, Genre, Title
 from users.models import User
@@ -20,7 +18,8 @@ from .serializers import (CategorySerializer, GenreSerializer,
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    """ Вьюсет для работы с произведениями """
+    """Вьюсет для работы с произведениями."""
+
     queryset = Title.objects.all()
     serializer_class = TitleGetSerializer
     filterset_class = TitleFilter
@@ -34,7 +33,8 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
-    """ Вьюсет для работы с категориями """
+    """Вьюсет для работы с категориями."""
+
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     filter_backends = (filters.SearchFilter,)
@@ -42,14 +42,17 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
 
 class GenreViewSet(viewsets.ModelViewSet):
-    """ Вьюсет для работы с жанрами """
+    """Вьюсет для работы с жанрами."""
+
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
 
-    
+
 class UsersViewSet(viewsets.ModelViewSet):
+    """Вьюсет для работы с пользователями."""
+
     queryset = User.objects.all()
     serializer_class = UsersSerializer
     permission_classes = (IsAuthenticated, AdminOnly,)
@@ -85,12 +88,14 @@ class UsersViewSet(viewsets.ModelViewSet):
 class APIGetToken(APIView):
     """
     Получение JWT-токена в обмен на username и confirmation code.
+
     Права доступа: Доступно без токена. Пример тела запроса:
     {
         "username": "string",
         "confirmation_code": "string"
     }
     """
+
     def post(self, request):
         serializer = GetTokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -112,14 +117,19 @@ class APIGetToken(APIView):
 
 class APISignup(APIView):
     """
-    Получить код подтверждения на переданный email. Права доступа: Доступно без
-    токена. Использовать имя 'me' в качестве username запрещено. Поля email и
-    username должны быть уникальными. Пример тела запроса:
+    Получить код подтверждения на переданный email.
+
+    Права доступа: Доступно без токена.
+    Использовать имя 'me' в качестве username запрещено.
+    Поля email и username должны быть уникальными.
+
+    Пример тела запроса:
     {
         "email": "string",
         "username": "string"
     }
     """
+
     permission_classes = (permissions.AllowAny,)
 
     @staticmethod
