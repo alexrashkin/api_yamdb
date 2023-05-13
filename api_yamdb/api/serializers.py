@@ -23,7 +23,6 @@ class CommentSerializer(serializers.ModelSerializer):
         model = Comment
 
 
-
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
