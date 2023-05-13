@@ -89,6 +89,8 @@ class APIGetToken(APIView):
         "confirmation_code": "string"
     }
     """
+    permission_classes = (permissions.AllowAny,)
+
     def post(self, request):
         serializer = GetTokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
