@@ -12,7 +12,9 @@ class Genre(models.Model):
                             unique=True, validators=[
                                 RegexValidator(
                                     regex=r'^[-a-zA-Z0-9_]+$',
-                                    message='Слаг может содержать только латинские буквы, цифры, знак подчеркивания и дефис.',
+                                    message='Слаг может содержать только'
+                                            'латинские буквы, цифры, знак'
+                                            'подчеркивания и дефис.',
                                     code='invalid_slug'
                                 )
                             ])
@@ -20,7 +22,22 @@ class Genre(models.Model):
     class Meta:
         verbose_name = "Жанр"
         verbose_name_plural = "Жанры"
-        
+
+    def __str__(self):
+        return self.name
+
+
+class Category(models.Model):
+    """ Модель категории """
+    name = models.CharField(verbose_name='Название категории',
+                            max_length=50, unique=True)
+    slug = models.SlugField(verbose_name='Слаг категории',
+                            max_length=50, unique=True)
+
+    class Meta:
+        verbose_name = "Категория"
+        verbose_name_plural = "Категории"
+
     def __str__(self):
         return self.name
 
@@ -34,25 +51,13 @@ class Title(models.Model):
     description = models.TextField(verbose_name='Описание произведения',
                                    null=True, blank=True)
     genre = models.ManyToManyField(Genre, verbose_name='Жанр произведения')
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL,
+                                 null=True, blank=True,
+                                 verbose_name='Категория')
 
     class Meta:
         verbose_name = "Произведение"
         verbose_name_plural = "Произведения"
-
-    def __str__(self):
-        return self.name
-    
-
-class Category(models.Model):
-    """ Модель категории """
-    name = models.CharField(verbose_name='Название категории', 
-                            max_length=50, unique=True)
-    slug = models.SlugField(verbose_name='Слаг категории',
-                            max_length=50, unique=True)
-    
-    class Meta:
-        verbose_name = "Категория"
-        verbose_name_plural = "Категории"
 
     def __str__(self):
         return self.name
