@@ -1,0 +1,6 @@
+{
+    "python.linting.flake8Enabled": true,
+    "python.linting.enabled": true,
+    "html.hover.documentation": false,
+    "editor.scrollbar.horizontalScrollbarSize": 15
+}
