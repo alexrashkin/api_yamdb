@@ -1,4 +1,4 @@
-from django.core.validators import (MinValueValidator, MaxValueValidator,
+from django.core.validators import (MaxValueValidator, MinValueValidator,
                                     RegexValidator)
 from django.db import models
 from users.models import User
@@ -7,7 +7,8 @@ from .validators import validate_year
 
 
 class Genre(models.Model):
-    """ Модель жанра """
+    """Модель жанра."""
+
     name = models.CharField(verbose_name='Название жанра',
                             max_length=50, unique=True)
     slug = models.SlugField(verbose_name='Слаг жанра', max_length=50,
@@ -30,7 +31,8 @@ class Genre(models.Model):
 
 
 class Category(models.Model):
-    """ Модель категории """
+    """Модель категории."""
+
     name = models.CharField(verbose_name='Название категории',
                             max_length=50, unique=True)
     slug = models.SlugField(verbose_name='Слаг категории',
@@ -45,7 +47,8 @@ class Category(models.Model):
 
 
 class Title(models.Model):
-    """ Модель произведения """
+    """Модель произведения."""
+
     name = models.CharField(verbose_name='Название произведения',
                             max_length=150, blank=False)
     year = models.IntegerField(verbose_name='Год создания',
@@ -66,6 +69,8 @@ class Title(models.Model):
 
 
 class Review(models.Model):
+    """Модель оценки."""
+
     title = models.ForeignKey(
         Title, on_delete=models.CASCADE, related_name='reviews')
     text = models.CharField(max_length=200)
@@ -85,6 +90,8 @@ class Review(models.Model):
 
 
 class Comment(models.Model):
+    """Модель комментария."""
+
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='comments')
     review = models.ForeignKey(

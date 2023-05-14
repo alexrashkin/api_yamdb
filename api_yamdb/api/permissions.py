@@ -18,9 +18,13 @@ class AdminOnly(permissions.BasePermission):
 class AuthorAdminModeratorOrReadOnly(permissions.BasePermission):
     """
     GET всех объектов - Доступно без токена.
-    POST объекта - Аутентифицированные пользователи
+
+    POST объекта - Аутентифицированные пользователи.
+
     GET объекта - Доступно без токена.
+
     PATCH объекта - Автор комментария, модератор или администратор.
+
     DEL объекта - Автор комментария, модератор или администратор.
     """
 
