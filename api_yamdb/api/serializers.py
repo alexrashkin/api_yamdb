@@ -1,7 +1,11 @@
 from rest_framework import serializers
-<<<<<<< HEAD
 from reviews.models import Category, Genre, Title
 from reviews.validators import validate_year
+from reviews.models import Category, Genre, Title
+from reviews.validators import validate_year
+from users.models import User
+from users.validators import validate_username
+
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -39,9 +43,6 @@ class TitleCreateSerializer(serializers.ModelSerializer):
         model = Title
         fields = 'id', 'name', 'category', 'genre', 'year', 'description'
     
-=======
-from users.models import User
-
 
 class UsersSerializer(serializers.ModelSerializer):
     class Meta:
@@ -75,7 +76,29 @@ class GetTokenSerializer(serializers.ModelSerializer):
 
 
 class SignUpSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = User
         fields = ('email', 'username')
->>>>>>> e10bb8baf67ffd1f9d4356dedd5e49c0ff5545cb
+
+    username = serializers.CharField(
+        required=True,
+        max_length=150,
+        validators=[validate_username, ]
+    )
+    email = serializers.EmailField(required=True, max_length=254)
+
+    def validate(self, data):
+        if User.objects.filter(username=data['username'],
+                               email=data['email']).exists():
+            return data
+        if (User.objects.filter(username=data['username']).exists()
+                or User.objects.filter(email=data['email']).exists()):
+            raise serializers.ValidationError(
+                'Пользователь с такими данными уже существует!'
+            )
+        return data
+
+    class Meta:
+        model = User
+        fields = ('email', 'username')

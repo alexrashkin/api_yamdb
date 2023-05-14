@@ -1,12 +1,23 @@
-<<<<<<< HEAD
+from api.permissions import AdminOnly
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
 from django.shortcuts import render
-from rest_framework import filters, viewsets
+from rest_framework import filters, permissions, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.filters import SearchFilter
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
+from rest_framework_simplejwt.tokens import RefreshToken
 from reviews.models import Category, Genre, Title
+from users.models import User
 
 from .filters import TitleFilter
 from .serializers import (CategorySerializer, GenreSerializer,
-                          TitleCreateSerializer, TitleGetSerializer)
+                          GetTokenSerializer, NotAdminSerializer,
+                          SignUpSerializer, TitleCreateSerializer,
+                          TitleGetSerializer, UsersSerializer)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -37,21 +48,20 @@ class GenreViewSet(viewsets.ModelViewSet):
     serializer_class = GenreSerializer
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
-=======
-from .serializers import (GetTokenSerializer,
-                          NotAdminSerializer,
-                          SignUpSerializer,
-                          UsersSerializer)
-from api.permissions import AdminOnly
-from users.models import User
-from rest_framework.filters import SearchFilter
-from rest_framework.permissions import IsAuthenticated
-from rest_framework import permissions, status, viewsets
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework_simplejwt.tokens import RefreshToken
-from django.core.mail import EmailMessage
+
+
+class TitleViewSet(viewsets.ModelViewSet):
+    """ Вьюсет для работы с произведениями """
+    queryset = Title.objects.all()
+    serializer_class = TitleGetSerializer
+    filterset_class = TitleFilter
+    search_fields = ('name',)
+    ordering = ('name',)
+
+    def get_serializer_class(self):
+        if self.request.method in ['POST', 'PUT', 'PATCH']:
+            return TitleCreateSerializer
+        return TitleGetSerializer
 
 
 class UsersViewSet(viewsets.ModelViewSet):
@@ -61,6 +71,7 @@ class UsersViewSet(viewsets.ModelViewSet):
     lookup_field = 'username'
     filter_backends = (SearchFilter, )
     search_fields = ('username', )
+    http_method_names = ['get', 'post', 'patch', 'delete', ]
 
     @action(
         methods=['GET', 'PATCH'],
@@ -95,6 +106,8 @@ class APIGetToken(APIView):
         "confirmation_code": "string"
     }
     """
+    permission_classes = (permissions.AllowAny,)
+
     def post(self, request):
         serializer = GetTokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -124,30 +137,25 @@ class APISignup(APIView):
         "username": "string"
     }
     """
+    queryset = User.objects.all()
+    serializer_class = SignUpSerializer
     permission_classes = (permissions.AllowAny,)
-
-    @staticmethod
-    def send_email(data):
-        email = EmailMessage(
-            subject=data['email_subject'],
-            body=data['email_body'],
-            to=[data['to_email']]
-        )
-        email.send()
 
     def post(self, request):
         serializer = SignUpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.save()
-        email_body = (
-            f'Здравствуйте, {user.username}.'
-            f'\nКод подтверждения для доступа к API: {user.confirmation_code}'
+        username = serializer.data.get('username')
+        email = serializer.data.get('email')
+        user, created = User.objects.get_or_create(
+            username=username,
+            email=email
         )
-        data = {
-            'email_body': email_body,
-            'to_email': user.email,
-            'email_subject': 'Код подтверждения для доступа к API!'
-        }
-        self.send_email(data)
+        confirmation_code = default_token_generator.make_token(user)
+        send_mail(
+            subject='Код подтверждения.',
+            message=f'Здравствуйте, {user.username}.'
+                    f'\nКод подтверждения для доступа: {confirmation_code}',
+            from_email=None,
+            recipient_list=[user.email],
+        )
         return Response(serializer.data, status=status.HTTP_200_OK)
->>>>>>> e10bb8baf67ffd1f9d4356dedd5e49c0ff5545cb
