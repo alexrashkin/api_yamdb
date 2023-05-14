@@ -1,23 +1,22 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
+from reviews.models import Category, Comment, Genre, Review, Title
 from reviews.validators import validate_year
-from reviews.models import Category, Genre, Title, Review, Comment
 from users.models import User
 from users.validators import validate_username
-from django.shortcuts import get_object_or_404
-
 
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = ('name', 'slug')
-        
+
 
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genre
         fields = ('name', 'slug')
-        
+
 
 class TitleGetSerializer(serializers.ModelSerializer):
     genre = GenreSerializer(many=True, read_only=True),
@@ -41,7 +40,7 @@ class TitleCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Title
         fields = 'id', 'name', 'category', 'genre', 'year', 'description'
-    
+
 
 class UsersSerializer(serializers.ModelSerializer):
     class Meta:
