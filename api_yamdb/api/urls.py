@@ -22,8 +22,39 @@ router_v1.register(
 
 urlpatterns = [
     path(f'{api_version}/', include(router_v1.urls)),
-    path(f'{api_version}/auth/token/',
-         APIGetToken.as_view(),
+    path(f'{api_version}/auth/token/', APIGetToken.as_view(),
          name='get_token'),
     path(f'{api_version}/auth/signup/', APISignup.as_view(), name='signup'),
+    path(
+        f'{api_version}/genres/<slug:slug>/',
+        GenreViewSet.as_view({
+            'get': 'retrieve',
+            'delete': 'destroy',
+            'patch': 'partial_update'}), name='genre_detail'),
+    path(
+        f'{api_version}/titles/<int:title_id>/reviews/'
+        f'<int:review_id>/comments/<int:pk>/',
+        CommentViewSet.as_view({'get': 'retrieve', 'delete': 'destroy'}),
+        name='comment_detail'),
+    path(
+        f'{api_version}/titles/<int:title_id>/reviews/<int:pk>/',
+        ReviewViewSet.as_view({
+            'get': 'retrieve',
+            'delete': 'destroy',
+            'patch': 'partial_update'}), name='review_detail'),
+    path(
+        f'{api_version}/titles/<int:pk>/',
+        TitleViewSet.as_view({
+            'get': 'retrieve',
+            'delete': 'destroy',
+            'patch': 'partial_update'}), name='title_detail'),
+    path(
+        f'{api_version}/users/me/',
+        UsersViewSet.as_view({
+            'get': 'retrieve',
+            'patch': 'partial_update'}), name='user_me'),
+    path(
+        f'{api_version}/users/<int:pk>/',
+        UsersViewSet.as_view({
+            'get': 'retrieve'}), name='user_detail'),
 ]

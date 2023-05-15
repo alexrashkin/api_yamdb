@@ -1,6 +1,7 @@
 from django.core.validators import (MaxValueValidator, MinValueValidator,
                                     RegexValidator)
 from django.db import models
+from django.db.models import Avg
 from users.models import User
 
 from .validators import validate_year
@@ -37,6 +38,12 @@ class Category(models.Model):
                             max_length=50, unique=True)
     slug = models.SlugField(verbose_name='Слаг категории',
                             max_length=50, unique=True)
+    titles = models.ManyToManyField(
+        'Title',
+        related_name='categories',
+        verbose_name='Тайтлы',
+        blank=True
+    )
 
     class Meta:
         verbose_name = "Категория"
@@ -59,6 +66,13 @@ class Title(models.Model):
     category = models.ForeignKey(Category, on_delete=models.SET_NULL,
                                  null=True, blank=True,
                                  verbose_name='Категория')
+    rating = models.FloatField(verbose_name='Рейтинг', null=True, blank=True)
+
+    def rating(self):
+        reviews = self.reviews.all()
+        if reviews:
+            return reviews.aggregate(Avg('score'))['score__avg']
+        return None
 
     class Meta:
         verbose_name = "Произведение"
