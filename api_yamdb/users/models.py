@@ -1,9 +1,10 @@
 from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.tokens import default_token_generator
 from django.db import models
-from .validators import validate_username
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.contrib.auth.tokens import default_token_generator
+
+from .validators import validate_username
 
 USER = 'user'
 ADMIN = 'admin'
