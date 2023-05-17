@@ -1,12 +1,10 @@
-from django.core.validators import (RegexValidator, MinValueValidator,
-                                    MaxValueValidator
-                                    )
-from django.contrib.auth import get_user_model
+from django.core.validators import (MaxValueValidator, MinValueValidator,
+                                    RegexValidator)
 from django.db import models
+from django.db.models import Avg
+from users.models import User
 
 from .validators import validate_year
-
-User = get_user_model()
 
 
 class Genre(models.Model):
@@ -18,9 +16,9 @@ class Genre(models.Model):
                             unique=True, validators=[
                                 RegexValidator(
                                     regex=r'^[-a-zA-Z0-9_]+$',
-                                    message='Слаг может содержать только \
-                                    латинские буквы, цифры, знак \
-                                    подчеркивания и дефис.',
+                                    message='Слаг может содержать только'
+                                            'латинские буквы, цифры, знак'
+                                            'подчеркивания и дефис.',
                                     code='invalid_slug'
                                 )
                             ])
@@ -40,6 +38,12 @@ class Category(models.Model):
                             max_length=50, unique=True)
     slug = models.SlugField(verbose_name='Слаг категории',
                             max_length=50, unique=True)
+    titles = models.ManyToManyField(
+        'Title',
+        related_name='categories',
+        verbose_name='Тайтлы',
+        blank=True
+    )
 
     class Meta:
         verbose_name = "Категория"
@@ -62,6 +66,13 @@ class Title(models.Model):
     category = models.ForeignKey(Category, on_delete=models.SET_NULL,
                                  null=True, blank=True,
                                  verbose_name='Категория')
+    rating = models.FloatField(verbose_name='Рейтинг', null=True, blank=True)
+
+    def rating(self):
+        reviews = self.reviews.all()
+        if reviews:
+            return reviews.aggregate(Avg('score'))['score__avg']
+        return None
 
     class Meta:
         verbose_name = "Произведение"
@@ -72,24 +83,35 @@ class Title(models.Model):
 
 
 class Review(models.Model):
+    """Модель оценки."""
+
+    title = models.ForeignKey(
+        Title, on_delete=models.CASCADE, related_name='reviews')
     text = models.CharField(max_length=200)
     score = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(10)]
     )
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='reviews')
+    pub_date = models.DateTimeField(
+        'Дата добавления', auto_now_add=True, db_index=True)
 
     def __str__(self):
         return self.text
 
+    class Meta:
+        unique_together = (('title', 'author'),)
+
 
 class Comment(models.Model):
+    """Модель комментария."""
+
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='comments')
     review = models.ForeignKey(
         Review, on_delete=models.CASCADE, related_name='comments')
     text = models.TextField()
-    created = models.DateTimeField(
+    pub_date = models.DateTimeField(
         'Дата добавления', auto_now_add=True, db_index=True)
 
     def __str__(self):
