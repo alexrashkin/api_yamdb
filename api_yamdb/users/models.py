@@ -6,22 +6,22 @@ from django.dispatch import receiver
 
 from .validators import validate_username
 
-USER = 'user'
-ADMIN = 'admin'
-MODERATOR = 'moderator'
-
 
 class User(AbstractUser):
-    CHOICES = [
-        ('user', 'Пользователь'),
-        ('moderator', 'Модератор'),
-        ('admin', 'Администратор'),
-    ]
+    USER = 'user'
+    ADMIN = 'admin'
+    MODERATOR = 'moderator'
+
+    CHOICES = (
+        (USER, 'Пользователь'),
+        (ADMIN, 'Модератор'),
+        (MODERATOR, 'Администратор'),
+    )
     role = models.CharField(
         max_length=50,
         choices=CHOICES,
         blank=False,
-        default='user',
+        default=USER,
         verbose_name='Роль'
     )
     username = models.CharField(
@@ -61,18 +61,6 @@ class User(AbstractUser):
                    'который был отправлен на ваш email')
     )
 
-    @property
-    def is_user(self):
-        return self.role == USER
-
-    @property
-    def is_admin(self):
-        return self.role == ADMIN
-
-    @property
-    def is_moderator(self):
-        return self.role == MODERATOR
-
     class Meta:
         ordering = ('id',)
         verbose_name = 'Пользователь'
@@ -80,6 +68,18 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.username
+
+    @property
+    def is_user(self):
+        return self.role == self.USER
+
+    @property
+    def is_admin(self):
+        return self.role == self. ADMIN or self.is_superuser
+
+    @property
+    def is_moderator(self):
+        return self.role == self.MODERATOR
 
 
 @receiver(post_save, sender=User)
