@@ -1,5 +1,6 @@
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
+from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
@@ -142,10 +143,15 @@ class APISignup(APIView):
         serializer.is_valid(raise_exception=True)
         username = serializer.data.get('username')
         email = serializer.data.get('email')
-        user, created = User.objects.get_or_create(
-            username=username,
-            email=email
-        )
+        try:
+            user, created = User.objects.get_or_create(
+                username=username,
+                email=email
+            )
+        except IntegrityError:
+            return Response('Пользователи с таким username'
+                            'или email уже существуют',
+                            status=status.HTTP_400_BAD_REQUEST)
         confirmation_code = default_token_generator.make_token(user)
         send_mail(
             subject='Код подтверждения.',
