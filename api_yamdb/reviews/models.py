@@ -63,11 +63,13 @@ class Title(models.Model):
                                validators=[validate_year], null=True)
     description = models.TextField(verbose_name='Описание произведения',
                                    null=True, blank=True)
-    genre = models.ManyToManyField(Genre, verbose_name='Жанр произведения')
+    genre = models.ManyToManyField(
+        Genre, verbose_name='Жанр произведения')
     category = models.ForeignKey(Category, on_delete=models.SET_NULL,
                                  null=True, blank=True,
                                  verbose_name='Категория')
-    rating = models.FloatField(verbose_name='Рейтинг', null=True, blank=True)
+    rating = models.FloatField(
+        verbose_name='Рейтинг', null=True, blank=True)
 
     def rating(self):
         reviews = self.reviews.all()
@@ -83,37 +85,42 @@ class Title(models.Model):
         return self.name
 
 
-class Review(models.Model):
-    """Модель оценки."""
+class AbsModel(models.Model):
+    """Модель для наследования."""
 
-    title = models.ForeignKey(
-        Title, on_delete=models.CASCADE, related_name='reviews')
+    class Meta:
+        abstract = True
+
     text = models.CharField(max_length=200)
-    score = models.IntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(10)]
-    )
-    author = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='reviews')
     pub_date = models.DateTimeField(
         'Дата добавления', auto_now_add=True, db_index=True)
 
     def __str__(self):
         return self.text
 
+
+class Review(AbsModel):
+    """Модель оценки."""
+
+    title = models.ForeignKey(
+        Title, on_delete=models.CASCADE, related_name='reviews')
+    score = models.IntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(10)]
+    )
+    author = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='reviews')
+
     class Meta:
-        unique_together = (('title', 'author'),)
+        constraints = [
+            models.UniqueConstraint(
+                fields=['title', 'author'], name='unique_author_review')
+        ]
 
 
-class Comment(models.Model):
+class Comment(AbsModel):
     """Модель комментария."""
 
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='comments')
     review = models.ForeignKey(
         Review, on_delete=models.CASCADE, related_name='comments')
-    text = models.TextField()
-    pub_date = models.DateTimeField(
-        'Дата добавления', auto_now_add=True, db_index=True)
-
-    def __str__(self):
-        return self.text
