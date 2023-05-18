@@ -22,5 +22,5 @@ htmlcov/
 coverage.xml
 *.cover
 media/
-.vscode
+.vscode/
  
