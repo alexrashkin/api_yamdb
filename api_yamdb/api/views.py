@@ -26,18 +26,22 @@ from .serializers import (CategorySerializer, CommentSerializer,
 
 
 class CategoryViewSet(ModelMixinViewSet):
+    """Вьюсет для работы с категориями."""
+
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    """Вьюсет для работы с категориями."""
 
 
 class GenreViewSet(ModelMixinViewSet):
+    """Вьюсет для работы с жанрами."""
+
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    """Вьюсет для работы с жанрами."""
 
 
 class TitleViewSet(ModelViewSet):
+    """Вьюсет для работы с произведениями."""
+
     queryset = Title.objects.all()
     pagination_class = LimitOffsetPagination
     permission_classes = (IsAdminOrReadOnly,)
@@ -47,7 +51,6 @@ class TitleViewSet(ModelViewSet):
         if self.action in ('list', 'retrieve'):
             return TitleGetSerializer
         return TitleCreateSerializer
-    """Вьюсет для работы с произведениями."""
 
 
 class UsersViewSet(viewsets.ModelViewSet):
