@@ -92,17 +92,6 @@ class SignUpSerializer(serializers.Serializer):
         model = User
         fields = ('email', 'username')
 
-    def validate(self, data):
-        if User.objects.filter(username=data['username'],
-                               email=data['email']).exists():
-            return data
-        if (User.objects.filter(username=data['username']).exists()
-                or User.objects.filter(email=data['email']).exists()):
-            raise serializers.ValidationError(
-                'Пользователь с такими данными уже существует!'
-            )
-        return data
-
 
 class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
