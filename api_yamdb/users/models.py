@@ -25,7 +25,7 @@ class User(AbstractUser):
         verbose_name='Роль'
     )
     username = models.CharField(
-        validators=[validate_username],
+        validators=(validate_username, ),
         max_length=150,
         unique=True,
         blank=False,
