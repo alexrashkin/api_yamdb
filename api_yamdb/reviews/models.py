@@ -85,7 +85,7 @@ class Title(models.Model):
         return self.name
 
 
-class AbsModel(models.Model):
+class ParentModelReviewAndComment(models.Model):
     """Модель для наследования."""
 
     class Meta:
@@ -99,7 +99,7 @@ class AbsModel(models.Model):
         return self.text
 
 
-class Review(AbsModel):
+class Review(ParentModelReviewAndComment):
     """Модель оценки."""
 
     title = models.ForeignKey(
@@ -111,13 +111,13 @@ class Review(AbsModel):
         User, on_delete=models.CASCADE, related_name='reviews')
 
     class Meta:
-        constraints = [
+        constraints = (
             models.UniqueConstraint(
-                fields=['title', 'author'], name='unique_author_review')
-        ]
+                fields=('title', 'author'), name='unique_author_review'),
+        )
 
 
-class Comment(AbsModel):
+class Comment(ParentModelReviewAndComment):
     """Модель комментария."""
 
     author = models.ForeignKey(
